@@ -29,8 +29,8 @@ class NN():
         self.parameters['w0'] = np.array(self.x)
         self.a[0] = np.array(self.x)
         for i in range(1,self.layer+1):
-                self.parameters['w'+str(i)] = np.random.randn(self.hide_size[i-1],self.parameters['w'+str(i-1)].shape[0])*0.01
-                self.parameters['b'+str(i)] = np.zeros((self.hide_size[i-1],1))
+            self.parameters['w'+str(i)] = np.random.randn(self.hide_size[i-1],self.parameters['w'+str(i-1)].shape[0])/np.sqrt(self.parameters['w'+str(i-1)].shape[0])
+            self.parameters['b'+str(i)] = np.zeros((self.hide_size[i-1],1))
     def printShape(self):
         print('-'*14,'print shape','-'*13)
         for i in range(1,self.layer+1):
@@ -68,7 +68,7 @@ class NN():
     def sigmoidgrad(self,cache):
         z = self.sigmoid(cache)*(1-self.sigmoid(cache))
         return z
-    def backward_propagation(self,lr = 0.009):
+    def backward_propagation(self,lr = 0.0075):
         for i in range(self.layer,0,-1):
             if i == self.layer:
                 self.da[i] = -(self.y/self.a[i] - (1-self.y)/( 1-self.a[i]))
@@ -86,7 +86,7 @@ class NN():
         y_pre[x>0.5] = 1
         y_pre[x<0.5] = 0
         return y_pre
-    def model(self,iteration = 10000,lr = 0.009,printloss = True):
+    def model(self,iteration = 3000,lr = 0.0075,printloss = True):
         self.initParameters()
         self.printShape()
         losses = []
