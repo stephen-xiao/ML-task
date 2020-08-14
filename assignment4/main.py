@@ -20,8 +20,6 @@ class NN():
         self.hide_size = hide_size
         self.parameters = {}
         self.z = {}
-        self.dz = {}
-        self.da = {}
         self.a = {}
         self.m = X.shape[1]
     def initParameters(self):
@@ -70,15 +68,16 @@ class NN():
         return z
     def backward_propagation(self,lr = 0.0075):
         for i in range(self.layer,0,-1):
+            da_pre = -(self.y/self.a[i] - (1-self.y)/( 1-self.a[i]))
+            dz = 0
             if i == self.layer:
-                self.da[i] = -(self.y/self.a[i] - (1-self.y)/( 1-self.a[i]))
-                self.dz[i] = -(self.y/self.a[i] - (1-self.y)/( 1-self.a[i]))*self.sigmoidgrad(self.z[i])
-                self.da[i] =  np.dot(self.parameters['w'+str(i)].T , self.dz[i])
+                dz = da_pre*self.sigmoidgrad(self.z[i])
+                da =  np.dot(self.parameters['w'+str(i)].T , dz)
             else: 
-                self.dz[i] =  self.da[i+1]*self.relugrad(self.z[i])
-                self.da[i] =  np.dot(self.parameters['w'+str(i)].T , self.dz[i])
-            dw = np.dot(self.dz[i],self.a[i-1].T)
-            db = np.dot(self.dz[i],np.ones((self.dz[i].shape[1],1)))
+                dz =  da*self.relugrad(self.z[i])
+                da =  np.dot(self.parameters['w'+str(i)].T , dz)
+            dw = np.dot(dz,self.a[i-1].T)
+            db = np.dot(dz,np.ones((dz.shape[1],1)))
             self.parameters['w'+str(i)] -= (1/self.m)*lr*dw
             self.parameters['b'+str(i)] -= (1/self.m)*lr*db
     def predict(self,x):
@@ -128,10 +127,8 @@ if __name__ == '__main__':
           .format(X.shape,Y.shape))
     print('-'*40)
     nn = NN(X,Y,4,[20, 7, 5])
-    #nn = NN(X,Y,2,[ 7 ])
     loss,y_pre = nn.model()
     nn.test(test_x_orig, test_y)
     plt.plot(loss)
     plt.show()
-
 
